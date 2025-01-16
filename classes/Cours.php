@@ -64,6 +64,10 @@ class Cours implements ICours{
         return $this->enseignant_id;
     }
 
+    public function getErrors(){
+        return $this->errors;
+    }
+
     //setters
     public function setId($id){
         if($id != null){
