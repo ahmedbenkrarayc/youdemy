@@ -3,7 +3,7 @@
 require_once __DIR__.'/Etudiant.php';
 
 class Enseignant extends Etudiant{
-    protected $status;
+    private $status;
 
     public function __construct($id, $fname, $lname, $email, $password, $status = null, $suspended = null, $createdAt = null, $updatedAt = null){
         parent::__construct($id, $fname, $lname, $email, $password, 'enseignant', $suspended, $createdAt, $updatedAt);
