@@ -217,7 +217,9 @@ abstract class User{
     public abstract function updateProfile();
 
     public static function logout(){
-
+        session_unset();
+        session_destroy();
+        header('Location: ./login.php');
     }
 
     public static function verifyAuth($role = null){
