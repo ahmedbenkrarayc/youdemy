@@ -221,6 +221,14 @@ abstract class User{
     }
 
     public static function verifyAuth($role = null){
-
+        if(isset($_SESSION['user_id']) && isset($_SESSION['user_role'])){
+            if($role != null){
+                return $_SESSION['user_role'] == $role;
+            }else{
+                return true;
+            }
+        }
+    
+        return false;
     }
 }
