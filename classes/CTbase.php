@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__.'/Database.php';
+require_once __DIR__.'/Logger.php';
 require_once __DIR__.'/../exceptions/InputException.php';
 
 abstract class CTbase{
@@ -15,7 +17,7 @@ abstract class CTbase{
             $this->createdAt = $createdAt;
             $this->updatedAt = $updatedAt;
         }catch(InputException $e){
-            array_push($this->errors, $e->getMessage());
+            $this->errors[] = $e->getMessage();
         }
     }
 
@@ -69,7 +71,26 @@ abstract class CTbase{
     public abstract function getTableName();
 
     public function create(){
+        try{
+            if($this->name == null){
+                array_push($this->errors, 'Name is required !');
+                return false;
+            }
+            $connection =  Database::getInstance()->getConnection();
+            $query = 'INSERT INTO '.$this->getTableName().'(name) values(:name)';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':name', htmlspecialchars($this->name), PDO::PARAM_STR);
+            if($stmt->execute()){
+                return true;
+            }
 
+            array_push($this->errors, 'Something went wrong please try again later !');
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }
     }
 
     public function update(){
