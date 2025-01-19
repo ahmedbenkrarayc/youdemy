@@ -11,7 +11,7 @@ class Database {
     private function __construct(){
         try{
             $this->validate();
-            $this->pdo = new PDO('mysql:host='.$GLOBALS['host'].';dbname='.$GLOBALS['db'].'; charset=utf8mb4', $GLOBALS['dbusername'], $GLOBALS['dbpassword']);
+            $this->pdo = new PDO('mysql:host='.$GLOBALS['host'].';dbname='.$GLOBALS['dbname'].'; charset=utf8mb4', $GLOBALS['dbusername'], $GLOBALS['dbpassword']);
             $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         }catch(EnvException $e){
@@ -38,16 +38,16 @@ class Database {
             throw new EnvException('Host doesn\'t exist in env !');
         }
 
-        if(!isset($GLOBALS['db']) || empty($GLOBALS['db'])){
+        if(!isset($GLOBALS['dbname']) || empty($GLOBALS['dbname'])){
             throw new EnvException('Database doesn\'t exist in env !');
         }
 
-        if(!isset($GLOBALS['username']) || empty($GLOBALS['username'])){
+        if(!isset($GLOBALS['dbusername']) || empty($GLOBALS['dbusername'])){
             throw new EnvException('Username doesn\'t exist in env !');
         }
 
         
-        if(!isset($GLOBALS['password'])){
+        if(!isset($GLOBALS['dbpassword'])){
             throw new EnvException('Password doesn\'t exist in env !');
         }
     }

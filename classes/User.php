@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__.'/Database.php';
+require_once __DIR__.'/Logger.php';
 require_once __DIR__.'/../exceptions/InputException.php';
 
 abstract class User{
@@ -23,7 +25,7 @@ abstract class User{
             $this->createdAt = $createdAt;
             $this->updatedAt = $updatedAt;
         }catch(InputException $e){
-            array_push($this->errors, $e->getMessage());
+            $this->errors[] = $e->getMessage();
         }
     }
 
@@ -124,7 +126,50 @@ abstract class User{
     //methods
 
     public function login(){
+        try{
+            $nullvalue = false;
+            if($this->email == null){
+                $this->errors = 'Email must have a value !';
+                $nullvalue = true;
+            }
+            
+            if($this->password == null){
+                $this->errors[] = 'Password must have a value !';
+                $nullvalue = true;
+            }
 
+            if($nullvalue)
+                return false;
+    
+            $connection = $this->database->getConnection();
+            $query = 'SELECT id, role, password FROM user WHERE email = :email';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':email', htmlspecialchars($this->email), PDO::PARAM_STR);
+            $stmt->execute();
+            $user = $stmt->fetch();
+
+            if($user){
+                //email found
+                if(password_verify($this->password, $user['password'])){
+                    //correct password
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['user_role'] = $user['role'];
+                    return true;
+                }else{
+                    //wrong password
+                    $this->errors[] = 'Wrong password !';
+                    return false;
+                }
+            }else{
+                //email notfound
+                $this->errors[] = 'We have no user with this email !';
+                return false;
+            }
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return false;
+        }
     }
 
     public function currentUser(){
