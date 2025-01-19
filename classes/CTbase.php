@@ -153,7 +153,17 @@ abstract class CTbase{
     }
 
     public function getAll(){
-
+        try{
+            $connection = Database::getInstance()->getConnection();
+            $query = 'select * from '.$this->getTableName();
+            $stmt = $connection->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return null;
+        }
     }
 
     public function getOne(){
