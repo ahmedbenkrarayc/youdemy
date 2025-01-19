@@ -161,12 +161,23 @@ abstract class CTbase{
             return $stmt->fetchAll();
         }catch(PDOException $e){
             Logger::error_log($e->getMessage());
-            array_push($this->errors, 'Something went wrong !');
+            $this->errors[] = 'Something went wrong !';
             return null;
         }
     }
 
     public function getOne(){
-
+        try{
+            $connection = Database::getInstance()->getConnection();
+            $query = 'select * from '.$this->getTableName().' where id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return null;
+        }
     }
 }
