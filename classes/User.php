@@ -129,12 +129,12 @@ abstract class User{
         try{
             $nullvalue = false;
             if($this->email == null){
-                $this->errors = 'Email must have a value !';
+                $this->errors = 'Email is required !';
                 $nullvalue = true;
             }
             
             if($this->password == null){
-                $this->errors[] = 'Password must have a value !';
+                $this->errors[] = 'Password is required !';
                 $nullvalue = true;
             }
 
