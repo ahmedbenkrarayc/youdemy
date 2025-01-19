@@ -23,5 +23,8 @@ require_once __DIR__.'/../classes/Category.php';
 //     echo 'failed';
 // }
 
-$category = new Category(null, null);
-print_r($category->getAll());
+// $category = new Category(null, null);
+// print_r($category->getAll());
+
+$category = new Category(2, null);
+print_r($category->getOne());
