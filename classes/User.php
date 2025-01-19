@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__.'/Database.php';
+require_once __DIR__.'/Logger.php';
 require_once __DIR__.'/../exceptions/InputException.php';
 
 abstract class User{
@@ -23,7 +25,7 @@ abstract class User{
             $this->createdAt = $createdAt;
             $this->updatedAt = $updatedAt;
         }catch(InputException $e){
-            array_push($this->errors, $e->getMessage());
+            $this->errors[] = $e->getMessage();
         }
     }
 
@@ -124,7 +126,88 @@ abstract class User{
     //methods
 
     public function login(){
+        try{
+            $nullvalue = false;
+            if($this->email == null){
+                $this->errors = 'Email is required !';
+                $nullvalue = true;
+            }
+            
+            if($this->password == null){
+                $this->errors[] = 'Password is required !';
+                $nullvalue = true;
+            }
 
+            if($nullvalue)
+                return false;
+    
+            $connection = Database::getInstance()->getConnection();
+            $query = 'SELECT id, role, password FROM user WHERE email = :email';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':email', htmlspecialchars($this->email), PDO::PARAM_STR);
+            $stmt->execute();
+            $user = $stmt->fetch();
+
+            if($user){
+                //email found
+                if(password_verify($this->password, $user['password'])){
+                    //correct password
+                    unset($stmt);
+                    if($user['role'] == 'etudiant'){
+                        $query = 'SELECT * from etudiant WHERE id = :id';
+                        $stmt = $connection->prepare($query);
+                        $stmt->bindValue(':id', $user['id'], PDO::PARAM_INT);
+                        $stmt->execute();
+                        $etudiant = $stmt->fetch();
+                        if($etudiant){
+                            if($etudiant['suspended'] == 1){
+                                $this->errors[] = 'Your account is suspended at the moment !';
+                                return false;
+                            }
+                        }else{
+                            $this->errors[] = 'Something went wrong please try again later.';
+                            return false;
+                        }
+                    }else if($user['role'] == 'enseignant'){
+                        $query = 'SELECT * from enseignant WHERE id = :id';
+                        $stmt = $connection->prepare($query);
+                        $stmt->bindValue(':id', $user['id'], PDO::PARAM_INT);
+                        $stmt->execute();
+                        $enseignant = $stmt->fetch();
+                        if($enseignant){
+                            if($enseignant['suspended'] == 1){
+                                $this->errors[] = 'Your account is suspended at the moment !';
+                                return false;
+                            }
+
+                            if($enseignant['status'] == 'in review'){
+                                $this->errors[] = 'Your account is still in review !';
+                                return false;
+                            }
+                        }else{
+                            $this->errors[] = 'Something went wrong please try again later.';
+                            return false;
+                        }
+                    }
+
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['user_role'] = $user['role'];
+                    return true;
+                }else{
+                    //wrong password
+                    $this->errors[] = 'Wrong password !';
+                    return false;
+                }
+            }else{
+                //email notfound
+                $this->errors[] = 'We have no user with this email !';
+                return false;
+            }
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return false;
+        }
     }
 
     public function currentUser(){
@@ -134,10 +217,20 @@ abstract class User{
     public abstract function updateProfile();
 
     public static function logout(){
-
+        session_unset();
+        session_destroy();
+        header('Location: ./login.php');
     }
 
     public static function verifyAuth($role = null){
-
+        if(isset($_SESSION['user_id']) && isset($_SESSION['user_role'])){
+            if($role != null){
+                return $_SESSION['user_role'] == $role;
+            }else{
+                return true;
+            }
+        }
+    
+        return false;
     }
 }
