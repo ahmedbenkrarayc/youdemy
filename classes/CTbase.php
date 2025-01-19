@@ -94,7 +94,38 @@ abstract class CTbase{
     }
 
     public function update(){
+        try{
+            $nullvalue = false;
 
+            if($this->id == null){
+                array_push($this->errors, 'Id is required !');
+                $nullvalue = true;
+            }
+
+            if($this->name == null){
+                array_push($this->errors, 'Name is required !');
+                $nullvalue = true;
+            }
+
+            if($nullvalue)
+                return false;
+
+            $connection = Database::getInstance()->getConnection();
+            $query = 'UPDATE '.$this->getTableName().' set name = :name where id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':name', htmlspecialchars($this->name), PDO::PARAM_STR);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+            if($stmt->execute()){
+                return true;
+            }
+
+            $this->errors[] = 'Something went wrong !';
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return false;
+        }
     }
 
     public function delete(){
