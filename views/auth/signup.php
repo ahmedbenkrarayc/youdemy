@@ -3,6 +3,10 @@ require_once './../../classes/Etudiant.php';
 require_once './../../classes/Enseignant.php';
 require_once './../../utils/csrf.php';
 
+if(User::verifyAuth()){
+    header('Location: ./../user/settings.php');
+}
+
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
   if(isset($_POST['csrf']) && $_POST['csrf'] == $_SESSION['csrf_token']){
     if($_POST['role'] == 'etudiant'){
@@ -37,7 +41,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>Sign up | Cultunova</title>
+    <title>Sign up | Youdemy</title>
     <!-- CSS files -->
     <link href="./../../dist/css/tabler.min.css?1692870487" rel="stylesheet"/>
     <link href="./../../dist/css/tabler-flags.min.css?1692870487" rel="stylesheet"/>
