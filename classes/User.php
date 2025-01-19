@@ -211,7 +211,27 @@ abstract class User{
     }
 
     public function currentUser(){
+        try{
+            if($this->id == null){
+                return false;
+            }
 
+            $connection = $this->database->getConnection();
+            $query = 'SELECT * FROM user WHERE id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+            $stmt->execute();
+            $user = $stmt->fetch();
+            if($user){
+                return $user;
+            }else{
+                return null;
+            }
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return null;
+        }
     }
 
     public abstract function updateProfile();
