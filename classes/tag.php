@@ -12,6 +12,17 @@ class Tag extends CTbase{
     }
 
     public function createMany($tags){
+        try{
+            foreach($tags as $tag){
+                $this->setName(htmlspecialchars($tag));
+                $this->create();
+            }
 
+            return true;
+        }catch(Exception $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return false;
+        }
     }
 }
