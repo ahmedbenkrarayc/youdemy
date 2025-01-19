@@ -141,7 +141,7 @@ abstract class User{
             if($nullvalue)
                 return false;
     
-            $connection = $this->database->getConnection();
+            $connection = Database::getInstance()->getConnection();
             $query = 'SELECT id, role, password FROM user WHERE email = :email';
             $stmt = $connection->prepare($query);
             $stmt->bindValue(':email', htmlspecialchars($this->email), PDO::PARAM_STR);
@@ -152,6 +152,44 @@ abstract class User{
                 //email found
                 if(password_verify($this->password, $user['password'])){
                     //correct password
+                    unset($stmt);
+                    if($user['role'] == 'etudiant'){
+                        $query = 'SELECT * from etudiant WHERE id = :id';
+                        $stmt = $connection->prepare($query);
+                        $stmt->bindValue(':id', $user['id'], PDO::PARAM_INT);
+                        $stmt->execute();
+                        $etudiant = $stmt->fetch();
+                        if($etudiant){
+                            if($etudiant['suspended'] == 1){
+                                $this->errors[] = 'Your account is suspended at the moment !';
+                                return false;
+                            }
+                        }else{
+                            $this->errors[] = 'Something went wrong please try again later.';
+                            return false;
+                        }
+                    }else if($user['role'] == 'enseignant'){
+                        $query = 'SELECT * from enseignant WHERE id = :id';
+                        $stmt = $connection->prepare($query);
+                        $stmt->bindValue(':id', $user['id'], PDO::PARAM_INT);
+                        $stmt->execute();
+                        $enseignant = $stmt->fetch();
+                        if($enseignant){
+                            if($enseignant['suspended'] == 1){
+                                $this->errors[] = 'Your account is suspended at the moment !';
+                                return false;
+                            }
+
+                            if($enseignant['status'] == 'in review'){
+                                $this->errors[] = 'Your account is still in review !';
+                                return false;
+                            }
+                        }else{
+                            $this->errors[] = 'Something went wrong please try again later.';
+                            return false;
+                        }
+                    }
+
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['user_role'] = $user['role'];
                     return true;
