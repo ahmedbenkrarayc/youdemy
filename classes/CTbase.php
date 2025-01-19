@@ -129,7 +129,27 @@ abstract class CTbase{
     }
 
     public function delete(){
+        try{
+            if($this->id == null){
+                $this->errors[] = 'Id is required !';
+                return false;
+            }
 
+            $connection = Database::getInstance()->getConnection();
+            $query = 'delete from '.$this->getTableName().' where id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+            if($stmt->execute()){
+                return true;
+            }
+
+            $this->errors[] = 'Something went wrong !';
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return false;
+        }
     }
 
     public function getAll(){
