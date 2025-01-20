@@ -20,7 +20,7 @@ class Enseignant extends Etudiant{
 
     public function setStatus($status){
         if($status != null){
-            if($status != 'accepted' && $status != 'in review' && $status != 'rejected')
+            if($status != 'confirmed' && $status != 'in review' && $status != 'rejected')
                 throw new InputException('Status must only be accepted, in review or rejected !');
         }
 
@@ -105,15 +105,31 @@ class Enseignant extends Etudiant{
 
     public function updateStatus(){
         try{
+            $nullable = false;
+            if($this->id == null){
+                $this->errors[] = 'Id is required !';
+                $nullable = true;
+            }
+            
             if($this->status == null){
                 $this->errors[] = 'Status is required !';
-                return false;
+                $nullable = true;
             }
+            
+            if($nullable)
+                return false;
 
             $connection = Database::getInstance()->getConnection();
-            $query = 'UPDATE FROM enseignant(status) VALUES(:status)';
+            $query = 'UPDATE enseignant SET status = :status WHERE id = :id';
             $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', $this->id,PDO::PARAM_INT);
             $stmt->bindValue(':status', htmlspecialchars($this->status),PDO::PARAM_STR);
+            if($stmt->execute()){
+                return true;
+            }
+
+            $this->errors[] = 'Something went wrong !';
+            return false;
         }catch(PDOException $e){
             Logger::error_log($e->getMessage());
             $this->errors[] = 'Something went wrong !';
@@ -125,6 +141,20 @@ class Enseignant extends Etudiant{
         try{
             $connection = Database::getInstance()->getConnection();
             $query = "select u.*, suspended, status from user u, enseignant e where u.id = e.id and role = 'enseignant'";
+            $stmt = $connection->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return null;
+        }
+    }
+
+    public function getRequests(){
+        try{
+            $connection = Database::getInstance()->getConnection();
+            $query = "select u.*, status from user u, enseignant e where u.id = e.id and e.status = 'in review'";
             $stmt = $connection->prepare($query);
             $stmt->execute();
             return $stmt->fetchAll();
