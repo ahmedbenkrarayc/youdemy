@@ -253,4 +253,6 @@ abstract class User{
     
         return false;
     }
+
+    public abstract function getAll();
 }
