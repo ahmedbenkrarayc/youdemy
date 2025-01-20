@@ -106,4 +106,18 @@ class Enseignant extends Etudiant{
     public function suspendAccount(){
 
     }
+
+    public function getAll(){
+        try{
+            $connection = Database::getInstance()->getConnection();
+            $query = "select u.*, suspended, status  from user u, enseignant e where u.id = e.id and role = 'enseignant'";
+            $stmt = $connection->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return null;
+        }
+    }
 }
