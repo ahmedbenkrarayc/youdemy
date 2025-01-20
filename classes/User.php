@@ -216,7 +216,7 @@ abstract class User{
                 return false;
             }
 
-            $connection = $this->database->getConnection();
+            $connection = Database::getInstance()->getConnection();
             $query = 'SELECT * FROM user WHERE id = :id';
             $stmt = $connection->prepare($query);
             $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
