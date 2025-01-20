@@ -8,40 +8,22 @@ if(!User::verifyAuth('admin')){
 }
 
 $enseignant = new Enseignant(null, null, null, null, null);
-$etudiant = new Etudiant(null, null, null, null, null);
-
-$enseignants = $enseignant->getAll() ?? [] ;
-$etudiants = $etudiant->getAll() ?? [] ;
-$data = array_merge($enseignants, $etudiants);
+$requests = $enseignant->getRequests();
 
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
   if(isset($_POST['csrf']) && $_POST['csrf'] == $_SESSION['csrf_token']){
-    if(isset($_POST['delete'])){
-        $etudiant->setId($_POST['delete']);
-        $etudiant->deleteAccount();
-    }
-    $u = array_values(array_filter($data, function($user){
-      return $user['id'] == $_POST['id'];
-    }));      
-    
-    if(isset($_POST['activate'])){
-      if($u[0]['role'] == 'etudiant'){
-        (new Etudiant($u[0]['id'], $u[0]['fname'], $u[0]['lname'], null, null, 0))->updateProfile();
-      }else{
-        (new Enseignant($u[0]['id'], $u[0]['fname'], $u[0]['lname'], null, null, null, 0))->updateProfile();
-      }
+    $enseignant->setId($_POST['id']);
+    if(isset($_POST['accept'])){
+        $enseignant->setStatus('confirmed');
+        $enseignant->updateStatus();
       header('Location: '.$_SERVER['PHP_SELF']);
     }
 
-    if(isset($_POST['suspend'])){
-      if($u[0]['role'] == 'etudiant'){
-        (new Etudiant($u[0]['id'], $u[0]['fname'], $u[0]['lname'], null, null, 1))->updateProfile();
-      }else{
-        print_r(new Enseignant($u[0]['id'], $u[0]['fname'], $u[0]['lname'], null, null, 1));
-        (new Enseignant($u[0]['id'], $u[0]['fname'], $u[0]['lname'], null, null, null, 1))->updateProfile();
+    if(isset($_POST['reject'])){
+        $enseignant->setStatus('rejected');
+        $enseignant->updateStatus();
+        header('Location: '.$_SERVER['PHP_SELF']);
       }
-      header('Location: '.$_SERVER['PHP_SELF']);
-    }
   }
 }
 ?>
@@ -52,7 +34,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>Users | Youdemy</title>
+    <title>Requests | Youdemy</title>
     <!-- CSS files -->
     <link href="./../../dist/css/tabler.min.css?1692870487" rel="stylesheet"/>
     <link href="./../../dist/css/tabler-flags.min.css?1692870487" rel="stylesheet"/>
@@ -81,7 +63,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
             <div class="row g-2 align-items-center">
               <div class="col">
                 <h2 class="page-title">
-                  Users list
+                  Enseignant requests list
                 </h2>
               </div>
             </div>
@@ -106,28 +88,24 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                       </tr>
                     </thead>
                     <tbody class="table-tbody">
-                      <?php foreach($data as $index => $item): ?>
+                      <?php foreach($requests as $index => $item): ?>
                       <tr>
                         <td class="sort-name"><?php echo $index+1 ?></td>
                         <td class="sort-city"><?php echo $item['fname'].' '.$item['lname'] ?></td>
                         <td class="sort-city"><?php echo $item['email'] ?></td>
                         <td class="sort-city"><?php echo $item['role'] ?></td>
-                        <td class="sort-city"><?php echo $item['suspended'] == 1 ? 'Suspended' : 'Activated' ?></td>
+                        <td class="sort-city"><?php echo $item['status'] ?></td>
                         <td class="sort-score"><?php echo explode(' ', $item['updatedAt'])[0] ?></td>
                         <td class="sort-date">
                             <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post" style="display: inline;">
                               <input type="hidden" name="csrf" value="<?php echo $_SESSION['csrf_token'] ?>">
                               <input type="hidden" name="id" value="<?php echo $item['id'] ?>">
-                              <?php if($item['suspended'] == 1): ?>
-                                <button type="submit" name="activate" style="color:green; background:transparent; border:none;">Activte</button>
-                              <?php else: ?>
-                                <button type="submit" name="suspend" style="color:red; background:transparent; border:none;">Suspend</button>
-                              <?php endif; ?>
+                                <button type="submit" name="accept" style="color:green; background:transparent; border:none;">Accept</button>
                             </form>
                             <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post" style="display: inline;">
                               <input type="hidden" name="csrf" value="<?php echo $_SESSION['csrf_token'] ?>">
                               <input type="hidden" name="id" value="<?php echo $item['id'] ?>">
-                              <button type="submit" name="delete" style="color:red; background:transparent; border:none;">delete</button>
+                                <button type="submit" name="reject" style="color:red; background:transparent; border:none;">Reject</button>
                             </form>
                         </td>
                       </tr>
