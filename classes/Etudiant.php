@@ -113,4 +113,18 @@ class Etudiant extends User{
     public function deleteAccount(){
 
     }
+
+    public function getAll(){
+        try{
+            $connection = Database::getInstance()->getConnection();
+            $query = "select u.*, suspended from user u, etudiant e where u.id = e.id and role = 'etudiant'";
+            $stmt = $connection->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return null;
+        }
+    }
 }
