@@ -1,7 +1,7 @@
 <?php 
 require_once './../../classes/Enseignant.php';
 require_once './../auth/user.php';
-session_start();
+require_once './../../utils/csrf.php';
 
 if(!User::verifyAuth('admin')){
   header('Location: ./../auth/login.php');
@@ -15,7 +15,36 @@ $etudiants = $etudiant->getAll() ?? [] ;
 $data = array_merge($enseignants, $etudiants);
 
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
+  if(isset($_POST['csrf']) && $_POST['csrf'] == $_SESSION['csrf_token']){
+    if(isset($_POST['delete'])){
+        $etudiant->setId($_POST['delete']);
+        $etudiant->deleteAccount();
+    }
+    $u = array_values(array_filter($data, function($user){
+      return $user['id'] == $_POST['id'];
+    }));      
     
+    // if($u){
+      if(isset($_POST['activate'])){
+        if($u[0]['role'] == 'etudiant'){
+          (new Etudiant($u[0]['id'], $u[0]['fname'], $u[0]['lname'], null, null, 0))->updateProfile();
+        }else{
+          (new Enseignant($u[0]['id'], $u[0]['fname'], $u[0]['lname'], null, null, null, 0))->updateProfile();
+        }
+        header('Location: '.$_SERVER['PHP_SELF']);
+      }
+  
+      if(isset($_POST['suspend'])){
+        if($u[0]['role'] == 'etudiant'){
+          (new Etudiant($u[0]['id'], $u[0]['fname'], $u[0]['lname'], null, null, 1))->updateProfile();
+        }else{
+          print_r(new Enseignant($u[0]['id'], $u[0]['fname'], $u[0]['lname'], null, null, 1));
+          (new Enseignant($u[0]['id'], $u[0]['fname'], $u[0]['lname'], null, null, null, 1))->updateProfile();
+        }
+        header('Location: '.$_SERVER['PHP_SELF']);
+      }
+    // }
+  }
 }
 ?>
 
@@ -25,7 +54,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>Categories | Youdemy</title>
+    <title>Users | Youdemy</title>
     <!-- CSS files -->
     <link href="./../../dist/css/tabler.min.css?1692870487" rel="stylesheet"/>
     <link href="./../../dist/css/tabler-flags.min.css?1692870487" rel="stylesheet"/>
@@ -54,7 +83,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
             <div class="row g-2 align-items-center">
               <div class="col">
                 <h2 class="page-title">
-                  Category list
+                  Users list
                 </h2>
               </div>
             </div>
@@ -89,6 +118,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                         <td class="sort-score"><?php echo explode(' ', $item['updatedAt'])[0] ?></td>
                         <td class="sort-date">
                             <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post" style="display: inline;">
+                              <input type="hidden" name="csrf" value="<?php echo $_SESSION['csrf_token'] ?>">
                               <input type="hidden" name="id" value="<?php echo $item['id'] ?>">
                               <?php if($item['suspended'] == 1): ?>
                                 <button type="submit" name="activate" style="color:green; background:transparent; border:none;">Activte</button>
@@ -97,6 +127,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                               <?php endif; ?>
                             </form>
                             <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post" style="display: inline;">
+                              <input type="hidden" name="csrf" value="<?php echo $_SESSION['csrf_token'] ?>">
                               <input type="hidden" name="id" value="<?php echo $item['id'] ?>">
                               <button type="submit" name="delete" style="color:red; background:transparent; border:none;">delete</button>
                             </form>

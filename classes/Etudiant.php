@@ -31,8 +31,67 @@ class Etudiant extends User{
     }
 
     //methods
+    public function getTableName(){
+        return 'etudiant';
+    }
+
     public function updateProfile(){
-        
+        try{
+            $nullvalue = false;
+            if($this->id == null){
+                array_push($this->errors, 'Id is required !');
+                $nullvalue = true;
+            }
+
+            if($this->fname == null){
+                array_push($this->errors, 'First name is required !');
+                $nullvalue = true;
+            }
+
+            if($this->lname == null){
+                array_push($this->errors, 'Last name is required !');
+                $nullvalue = true;
+            }
+
+            if($nullvalue)
+                return false;
+
+            $connection = Database::getInstance()->getConnection();
+            $query = 'UPDATE user SET fname = :fname, lname = :lname '; 
+            if($this->password != null)
+                $query .= 'password = :password ';
+            $query .= ' WHERE id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+            $stmt->bindValue(':fname', htmlspecialchars($this->fname), PDO::PARAM_STR);
+            $stmt->bindValue(':lname', htmlspecialchars($this->lname), PDO::PARAM_STR);
+            if($this->password != null){
+                $hashedPassword = password_hash($this->password, PASSWORD_DEFAULT);
+                $stmt->bindValue(':password', $hashedPassword, PDO::PARAM_STR);
+            }
+
+            if($stmt->execute()){
+                if($this->suspended === null){
+                    return true;
+                }else{
+                    unset($stmt);
+                    $query = 'UPDATE '.$this->getTableName().' SET suspended = :suspended WHERE id = :id';
+                    $stmt = $connection->prepare($query);
+                    $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+                    $stmt->bindValue(':suspended', $this->suspended, PDO::PARAM_INT);
+                    if($stmt->execute()){
+                        return true;
+                    }
+                }
+            }
+
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }
     }
 
     public function register(){
@@ -106,12 +165,32 @@ class Etudiant extends User{
         }
     }
 
-    public function suspendAccount(){
-
-    }
-
     public function deleteAccount(){
+        try{
+            $nullvalue = false;
+            if($this->id == null){
+                $this->errors[] = 'Id is required !';
+                $nullvalue = true;
+            }
 
+            if($nullvalue)
+                return false;
+
+            $connection = Database::getInstance()->getConnection();
+            $query = 'DELETE FROM user WHERE id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', $this->id);
+            if($stmt->execute()){
+                return true;
+            }
+
+            $this->errors[] = 'Something went wrong !';
+            return false;
+        }catch(InputException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return false;
+        }
     }
 
     public function getAll(){

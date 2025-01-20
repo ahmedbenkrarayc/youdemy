@@ -6,7 +6,7 @@ class Enseignant extends Etudiant{
 
     public function __construct($id, $fname, $lname, $email, $password, $status = null, $suspended = null, $createdAt = null, $updatedAt = null){
         try{
-            parent::__construct($id, $fname, $lname, $email, $password, $suspended = null, $createdAt = null, $updatedAt = null);
+            parent::__construct($id, $fname, $lname, $email, $password, $suspended, $createdAt, $updatedAt);
             $this->setRole('enseignant');
             $this->setStatus($status);
         }catch(InputException $e){
@@ -28,8 +28,8 @@ class Enseignant extends Etudiant{
     }
 
     //methods
-    public function updateProfile(){
-        
+    public function getTableName(){
+        return 'enseignant';
     }
 
     public function register(){
@@ -103,14 +103,28 @@ class Enseignant extends Etudiant{
         }
     }
 
-    public function suspendAccount(){
+    public function updateStatus(){
+        try{
+            if($this->status == null){
+                $this->errors[] = 'Status is required !';
+                return false;
+            }
 
+            $connection = Database::getInstance()->getConnection();
+            $query = 'UPDATE FROM enseignant(status) VALUES(:status)';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':status', htmlspecialchars($this->status),PDO::PARAM_STR);
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return false;
+        }
     }
 
     public function getAll(){
         try{
             $connection = Database::getInstance()->getConnection();
-            $query = "select u.*, suspended, status  from user u, enseignant e where u.id = e.id and role = 'enseignant'";
+            $query = "select u.*, suspended, status from user u, enseignant e where u.id = e.id and role = 'enseignant'";
             $stmt = $connection->prepare($query);
             $stmt->execute();
             return $stmt->fetchAll();
