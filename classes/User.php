@@ -119,7 +119,7 @@ abstract class User{
     public function setRole($role){
         if($role != null)
             if($role != 'admin' && $role != 'enseignant' && $role != 'etudiant')
-                throw new InputException('Role can only be admin, visitor or author !');
+                throw new InputException('Role can only be admin, etudiant or enseignant !');
         $this->role = $role;
     }
 
@@ -253,4 +253,6 @@ abstract class User{
     
         return false;
     }
+
+    public abstract function getAll();
 }
