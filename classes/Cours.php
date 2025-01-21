@@ -220,8 +220,81 @@ class Cours implements ICours{
         }
     }
 
-    public function updateCourse(){
+    public function updateCourse($tags){
+        try{
+            $nullvalue = false;
 
+            if($this->id == null){
+                array_push($this->errors, 'Id is required !');
+                $nullvalue = true;
+            }
+
+            if($this->title == null){
+                array_push($this->errors, 'Title is required !');
+                $nullvalue = true;
+            }
+
+            if($this->description == null){
+                array_push($this->errors, 'Description is required !');
+                $nullvalue = true;
+            }
+
+            if($this->content == null){
+                array_push($this->errors, 'Content is required !');
+                $nullvalue = true;
+            }
+
+            if($this->cover == null){
+                array_push($this->errors, 'Cover is required !');
+                $nullvalue = true;
+            }
+
+            if($this->type == null){
+                array_push($this->errors, 'Type is required !');
+                $nullvalue = true;
+            }
+
+            if($this->category_id == null){
+                array_push($this->errors, 'Category is required !');
+                $nullvalue = true;
+            }
+
+            if($this->enseignant_id == null){
+                array_push($this->errors, 'Enseignant is required !');
+                $nullvalue = true;
+            }
+
+            if($nullvalue)
+                return false;
+
+            $connection = Database::getInstance()->getConnection();
+            $query = 'UPDATE cours SET title = :title, description = :description, content = :content, cover = :cover, category_id = :category_id, enseignant_id = :enseignant_id, type = :type WHERE id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+            $stmt->bindValue(':title', htmlspecialchars($this->title), PDO::PARAM_STR);
+            $stmt->bindValue(':description', htmlspecialchars($this->description), PDO::PARAM_STR);
+            $stmt->bindValue(':content', htmlspecialchars($this->content), PDO::PARAM_STR);
+            $stmt->bindValue(':cover', htmlspecialchars($this->cover), PDO::PARAM_STR);
+            $stmt->bindValue(':category_id', htmlspecialchars($this->category_id), PDO::PARAM_INT);
+            $stmt->bindValue(':enseignant_id', htmlspecialchars($this->enseignant_id), PDO::PARAM_INT);
+            $stmt->bindValue(':type', htmlspecialchars($this->type), PDO::PARAM_STR);
+            if($stmt->execute()){
+                $tag = new CoursTag($this->id, null);
+                $tag->detachAllCoursTags();
+                foreach($tags as $item){
+                    $tag = new CoursTag($this->id, $item);
+                    $tag->attachCoursTag();
+                }
+                return true;
+            }
+
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }
     }
 
     public function deleteCourse(){
@@ -233,6 +306,22 @@ class Cours implements ICours{
     }
 
     public function getOneCourse(){
-        
+        try{
+            if($this->id == null){
+                $this->errors[] = 'Id is required !';
+                return false;
+            }
+
+            $connection = Database::getInstance()->getConnection();
+            $query = 'SELECT a.*, u.fname, u.lname FROM cours a INNER JOIN user u ON a.enseignant_id = u.id LEFT JOIN enseignant ad ON a.enseignant_id = ad.id WHERE (ad.id IS NULL OR ad.suspended = 0) AND a.id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return null;
+        }
     }
 }

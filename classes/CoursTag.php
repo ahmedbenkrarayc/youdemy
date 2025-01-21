@@ -86,10 +86,75 @@ class CoursTag{
     }
 
     public function detachCoursTag(){
+        try{
+            if($this->cours_id == null){
+                $this->errors[] = 'Course id is required !';
+                return false;
+            }
 
+            if($this->tag_id == null){
+                $this->errors[] = 'Tag id is required !';
+                return false;
+            }
+
+            $connection = Database::getInstance()->getConnection();
+            $query = 'DELETE FROM courstag WHERE cours_id = :cours_id AND tag_id = :tag_id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':cours_id', htmlspecialchars($this->cours_id), PDO::PARAM_INT);
+            $stmt->bindValue(':tag_id', htmlspecialchars($this->tag_id), PDO::PARAM_INT);
+            if($stmt->execute()){
+                return true;
+            }
+
+            $this->errors[] = 'Something went wrong !';
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return false;
+        }
     }
 
     public function detachAllCoursTags(){
-        
+        try{
+            if($this->cours_id == null){
+                array_push($this->errors, 'Course id is required !');
+                return false;
+            }
+            $connection = Database::getInstance()->getConnection();
+            $query = 'DELETE FROM courstag WHERE cours_id = :cours_id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':cours_id', htmlspecialchars($this->cours_id), PDO::PARAM_INT);
+            if($stmt->execute()){
+                return true;
+            }
+
+            $this->errors[] = 'Something went wrong !';
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return false;
+        }
+    }
+
+    public function tagsOfCours(){
+        try{
+            if($this->cours_id == null){
+                $this->errors[] = 'Course id is required !';
+                return false;
+            }
+
+            $connection = Database::getInstance()->getConnection();
+            $query = 'SELECT t.* from tag t, courstag a WHERE a.tag_id = t.id and a.cours_id = :cours_id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':cours_id', htmlspecialchars($this->cours_id), PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return null;
+        }
     }
 }

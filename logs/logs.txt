@@ -39,3 +39,9 @@
 2025-01-21 21:44:12	SQLSTATE[HY093]: Invalid parameter number: parameter was not defined
 2025-01-21 21:45:35	SQLSTATE[42S02]: Base table or view not found: 1146 Table 'youdemy.articletag' doesn't exist
 2025-01-21 21:51:02	SQLSTATE[42S02]: Base table or view not found: 1146 Table 'youdemy.articletag' doesn't exist
+2025-01-21 22:31:09	SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.cours_id' in 'on clause'
+2025-01-21 22:31:51	SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.cours_id' in 'on clause'
+2025-01-21 22:31:54	SQLSTATE[42S22]: Column not found: 1054 Unknown column 'a.cours_id' in 'on clause'
+2025-01-21 23:10:43	SQLSTATE[42S22]: Column not found: 1054 Unknown column 'id' in 'where clause'
+2025-01-21 23:11:44	SQLSTATE[42S22]: Column not found: 1054 Unknown column 'id' in 'where clause'
+2025-01-21 23:13:06	SQLSTATE[42S22]: Column not found: 1054 Unknown column 'id' in 'where clause'
