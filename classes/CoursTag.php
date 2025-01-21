@@ -1,17 +1,18 @@
 <?php 
+require_once __DIR__.'/Database.php';
 require_once __DIR__.'/../exceptions/InputException.php';
 
 class CoursTag{
     private $cours_id;
     private $tag_id;
-    private $errors;
+    private $errors = [];
 
     public function __construct($cours_id, $tag_id){
         try{
             $this->setCoursId($cours_id);
             $this->setTagId($tag_id);
         }catch(InputException $e){
-            array_push($this->errors, $e->getMessage());
+            $this->errors[] = $e->getMessage();
         }
     }
 
@@ -55,7 +56,33 @@ class CoursTag{
 
     //methods
     public function attachCoursTag(){
+        try{
+            if($this->cours_id == null){
+                array_push($this->errors, 'Cours id is required !');
+                return false;
+            }
 
+            if($this->tag_id == null){
+                array_push($this->errors, 'Tag id is required !');
+                return false;
+            }
+
+            $connection =  Database::getInstance()->getConnection();
+            $query = 'insert into courstag(cours_id, tag_id) values(:cours_id, :tag_id)';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':cours_id', htmlspecialchars($this->cours_id), PDO::PARAM_INT);
+            $stmt->bindValue(':tag_id', htmlspecialchars($this->tag_id), PDO::PARAM_INT);
+            if($stmt->execute()){
+                return true;
+            }
+
+            $this->errors[] = $e->getMessage();
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = $e->getMessage();
+            return false;
+        }
     }
 
     public function detachCoursTag(){

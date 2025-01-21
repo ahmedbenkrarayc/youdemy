@@ -1,6 +1,8 @@
 <?php 
 require_once __DIR__.'/../exceptions/InputException.php';
 require_once __DIR__.'/../interfaces/ICours.php';
+require_once __DIR__.'/Database.php';
+require_once __DIR__.'/CoursTag.php';
 
 class Cours implements ICours{
     private $id;
@@ -12,9 +14,10 @@ class Cours implements ICours{
     private $createdAt;
     private $updatedAt;
     private $enseignant_id;
+    private $category_id;
     private $errors = [];
 
-    public function __construct($id, $title, $description, $content, $cover, $type, $enseignant_id, $createdAt = null, $updatedAt = null){
+    public function __construct($id, $title, $description, $content, $cover = null, $type = null, $category_id = null,$enseignant_id = null, $createdAt = null, $updatedAt = null){
         try{
             $this->setId($id);
             $this->setTitle($title);
@@ -22,6 +25,7 @@ class Cours implements ICours{
             $this->setContent($content);
             $this->setCover($cover);
             $this->setType($type);
+            $this->setCategoryId($category_id);
             $this->setEnseignantId($enseignant_id);
             $this->createdAt = $createdAt;
             $this->updatedAt = $updatedAt;
@@ -62,6 +66,10 @@ class Cours implements ICours{
 
     public function getEnseigantId(){
         return $this->enseignant_id;
+    }
+
+    public function getCategoryId(){
+        return $this->category_id;
     }
 
     public function getErrors(){
@@ -130,9 +138,86 @@ class Cours implements ICours{
         $this->enseignant_id = $enseignant_id;
     }
 
-    //methods
-    public function createCourse(){
+    public function setCategoryId($category_id){
+        if($category_id != null){
+            if(!filter_var($category_id, FILTER_VALIDATE_INT))
+                throw new InputException('Category id must be a number !');
 
+            if($category_id < 1)
+                throw new InputException('Category id must be a positive number greater than 0 !');
+        }
+
+        $this->category_id = $category_id;
+    }
+
+    //methods
+    public function createCourse($tags){
+        try{
+            $nullvalue = false;
+            if($this->title == null){
+                array_push($this->errors, 'Title is required !');
+                $nullvalue = true;
+            }
+
+            if($this->description == null){
+                array_push($this->errors, 'Description is required !');
+                $nullvalue = true;
+            }
+
+            if($this->content == null){
+                array_push($this->errors, 'Content is required !');
+                $nullvalue = true;
+            }
+
+            if($this->cover == null){
+                array_push($this->errors, 'Cover is required !');
+                $nullvalue = true;
+            }
+
+            if($this->type == null){
+                array_push($this->errors, 'Type is required !');
+                $nullvalue = true;
+            }
+
+            if($this->category_id == null){
+                array_push($this->errors, 'Category is required !');
+                $nullvalue = true;
+            }
+
+            if($this->enseignant_id == null){
+                array_push($this->errors, 'Enseignant is required !');
+                $nullvalue = true;
+            }
+
+            if($nullvalue)
+                return false;
+
+            $connection = Database::getInstance()->getConnection();
+            $query = 'INSERT INTO cours(title, description, content, type, cover, category_id, enseignant_id) values(:title, :description, :content, :type, :cover, :category_id, :enseignant_id)';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':title', htmlspecialchars($this->title), PDO::PARAM_STR);
+            $stmt->bindValue(':description', htmlspecialchars($this->description), PDO::PARAM_STR);
+            $stmt->bindValue(':content', htmlspecialchars($this->content), PDO::PARAM_STR);
+            $stmt->bindValue(':type', htmlspecialchars($this->type), PDO::PARAM_STR);
+            $stmt->bindValue(':cover', htmlspecialchars($this->cover), PDO::PARAM_STR);
+            $stmt->bindValue(':category_id', htmlspecialchars($this->category_id), PDO::PARAM_INT);
+            $stmt->bindValue(':enseignant_id', htmlspecialchars($this->enseignant_id), PDO::PARAM_INT);
+            if($stmt->execute()){
+                $lastId = $connection->lastInsertId();
+                foreach($tags as $item){
+                    $tag = new CoursTag($lastId, $item);
+                    $tag->attachCoursTag();
+                }
+                return true;
+            }
+
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }
     }
 
     public function updateCourse(){
