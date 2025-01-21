@@ -298,11 +298,46 @@ class Cours implements ICours{
     }
 
     public function deleteCourse(){
+        try{
+            if($this->id == null){
+                array_push($this->errors, 'Id is required !');
+                $nullvalue = true;
+            }
+            
+            $connection = Database::getInstance()->getConnection();
+            $query = 'DELETE FROM cours WHERE id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', $this->id, PDO::PARAM_INT);
+            if($stmt->execute()){
+                return true;
+            }
 
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return false;
+        }
     }
 
     public function getAllCourse(){
 
+    }
+
+    public function getCoursesByEnseignant(){
+        try{
+            $connection = Database::getInstance()->getConnection();
+            $query = 'SELECT c.*, ct.name as category from cours c, category ct WHERE c.category_id = ct.id AND enseignant_id = :enseignant_id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':enseignant_id', $this->enseignant_id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return null;
+        }
     }
 
     public function getOneCourse(){
