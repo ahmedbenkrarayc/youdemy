@@ -358,7 +358,7 @@ class Cours implements ICours{
             }
 
             $connection = Database::getInstance()->getConnection();
-            $query = 'SELECT a.*, u.fname, u.lname FROM cours a INNER JOIN user u ON a.enseignant_id = u.id LEFT JOIN enseignant ad ON a.enseignant_id = ad.id WHERE (ad.id IS NULL OR ad.suspended = 0) AND a.id = :id';
+            $query = 'SELECT a.*, u.fname, u.lname, ct.name as category FROM cours a INNER JOIN category ct on ct.id = a.category_id INNER JOIN user u ON a.enseignant_id = u.id LEFT JOIN enseignant ad ON a.enseignant_id = ad.id WHERE (ad.id IS NULL OR ad.suspended = 0) AND a.id = :id';
             $stmt = $connection->prepare($query);
             $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
             $stmt->execute();

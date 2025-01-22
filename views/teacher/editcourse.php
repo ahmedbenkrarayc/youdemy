@@ -40,12 +40,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
           $cover = $current['cover'];
         }
 
-        if(isset($_FILES['cover']) && $_FILES['cover']['error'] == 0){
+        if(isset($_FILES['content']) && $_FILES['content']['error'] == 0){
             $docName = 'content'.time().rand(1000, 9999).'.'.pathinfo($_FILES['content']['name'], PATHINFO_EXTENSION);
             move_uploaded_file($_FILES['content']['tmp_name'], './../../assets/uploads/'.$docName);
             $doc = '/assets/uploads/'.$docName;
         }else{
-            $doc = $current['cover'];
+            $doc = $current['content'];
         }
 
         $cours = new Cours($_GET['id'], $_POST['title'], $_POST['description'], $doc, $cover, $_POST['type'], $_POST['category_id'], $_SESSION['user_id'], null, null);
