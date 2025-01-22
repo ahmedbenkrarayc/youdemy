@@ -1,7 +1,7 @@
 <?php 
 require_once './../../classes/Category.php';
-require_once './../auth/user.php';
 require_once './../../utils/csrf.php';
+require_once './../auth/user.php';
 
 if(!User::verifyAuth('admin')){
   header('Location: ./../auth/login.php');
@@ -66,7 +66,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
     <script src="./../../dist/js/demo-theme.min.js?1692870487"></script>
     <div class="page">
         <!-- header here -->
-
+        <?php require_once './../../utils/__header.php' ?>
         <div class="page-wrapper">
         <div style="margin-inline: auto; width: 80%; margin-top: 50px;">
             <div id="errors" class="alert alert-danger" role="alert" style="background: white; display: none;">
@@ -103,7 +103,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
               </form>
             </div>
         </div>
-
+        <?php require_once './../../utils/__footer.php' ?>
       </div>
     </div>
     <script src="./../../assets/js/validation.js"></script>

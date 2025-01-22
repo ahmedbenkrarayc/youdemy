@@ -24,7 +24,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
     if(isset($_POST['inscription'])){
         $inscription = new Inscription($_GET['id'], $_SESSION['user_id']);
         $inscription->attachEtudiantCours();
-        // header('Location: ./etudiant/favorites.php');
+        header('Location: ./etudiant/favorites.php');
     }
 }
 
@@ -57,7 +57,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
     <script src="./../../dist/js/demo-theme.min.js?1692870487"></script>
     <div class="page">
         <!-- header here -->
-        
+        <?php require_once './../utils/__header.php' ?>
         <div class="page-wrapper">
             <!-- Page body -->
             <div class="page-body">
@@ -121,8 +121,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                         </div>
                     </div>
                 </div>
-            
             </div>
+            <?php require_once './../utils/__footer.php' ?>
         </div>
     </div>
     <!-- Libs JS -->

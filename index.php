@@ -37,7 +37,7 @@ $categories = $category->getAll() ?? [] ;
   </head>
   <body >
     <script src="./../../dist/js/demo-theme.min.js?1692870487"></script>
-
+    <?php require_once './/utils/__header.php' ?>
     <div class="page-wrapper">
         <!-- Page header -->
         <div class="page-header d-print-none">
@@ -89,7 +89,7 @@ $categories = $category->getAll() ?? [] ;
             </div>
           </div>
         </div>
-
+        <?php require_once './utils/__footer.php' ?>
       </div>
       <script src="./../../assets/js/home.js"></script>
     <!-- Libs JS -->
