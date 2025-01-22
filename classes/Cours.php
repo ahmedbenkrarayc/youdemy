@@ -322,7 +322,17 @@ class Cours implements ICours{
     }
 
     public function getAllCourse(){
-
+        try{
+            $connection = Database::getInstance()->getConnection();
+            $query = 'SELECT a.*, u.fname AS teacher_fname, u.lname AS teacher_lname FROM cours a LEFT JOIN user u ON a.enseignant_id = u.id LEFT JOIN enseignant an ON a.enseignant_id = an.id WHERE an.id IS NULL OR an.suspended = 0;';
+            $stmt = $connection->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return null;
+        }
     }
 
     public function getCoursesByEnseignant(){
