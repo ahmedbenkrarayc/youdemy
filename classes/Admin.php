@@ -3,7 +3,7 @@
 require_once __DIR__.'/User.php';
 
 class Admin extends User{
-    public function __construct($id, $fname, $lname, $email, $password, $createdAt, $updatedAt){
+    public function __construct($id, $fname, $lname, $email, $password, $createdAt = null, $updatedAt = null){
         parent::__construct($id, $fname, $lname, $email, $password, 'admin', $createdAt, $updatedAt);
     }
 
@@ -74,7 +74,7 @@ class Admin extends User{
     public function top3Enseignant(){
         try{
             $connection = Database::getInstance()->getConnection();
-            $query = "SELECT COUNT(*) AS nombre, CONCAT(fname,' ',lname) AS name FROM inscription i, cours c, user e WHERE i.cours_id = c.id AND c.enseignant_id = e.id GROUP BY e.id ORDER BY nombre DESC LIMIT 3";
+            $query = "SELECT COUNT(*) AS nombre, fname, lname FROM inscription i, cours c, user e WHERE i.cours_id = c.id AND c.enseignant_id = e.id GROUP BY e.id ORDER BY nombre DESC LIMIT 3";
             $stmt = $connection->prepare($query);
             $stmt->execute();
             return $stmt->fetchAll();
