@@ -40,7 +40,7 @@ $catcourse = $admin->reparationParCategory() ?? [];
     <script src="./../../dist/js/demo-theme.min.js?1692870487"></script>
     <div class="page">
         <!-- header here -->
-        
+        <?php require_once './../../utils/__header.php' ?>
         <div class="page-wrapper">
             <!-- Page body -->
             <div class="page-body">
@@ -198,6 +198,7 @@ $catcourse = $admin->reparationParCategory() ?? [];
                 </div>
             </div>
           </div>
+        <?php require_once './../../utils/__footer.php' ?>
         </div>
     </div>
     <!-- Libs JS -->

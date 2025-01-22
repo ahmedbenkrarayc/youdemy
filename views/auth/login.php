@@ -1,9 +1,17 @@
 <?php 
 require_once './../../classes/Etudiant.php';
 require_once './../../utils/csrf.php';
+require_once './user.php';
+
 
 if(User::verifyAuth()){
-    header('Location: ./../user/settings.php');
+  if($_SESSION['user_role'] == 'admin'){
+    header('Location: ./../admin/statistics.php');
+  }else if($_SESSION['user_role'] == 'enseignant'){
+    header('Location: ./../teacher/statistics.php');
+  }else{
+    header('Location: ./../etudiant/favorite.php');
+  }
 }
 
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
@@ -53,6 +61,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
   </head>
   <body  class=" d-flex flex-column">
     <script src="./../../dist/js/demo-theme.min.js?1692870487"></script>
+    <?php require_once './../../utils/__header.php' ?>
     <div class="page page-center">
       <div class="container container-tight py-4">
         <div id="errors" class="alert alert-danger" role="alert" style="background: white; display: none;">
@@ -94,6 +103,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
           Don't have account yet? <a href="./signup.php" tabindex="-1">Sign up</a>
         </div>
       </div>
+      <?php require_once './../../utils/__footer.php' ?>
     </div>
     <script src="./../../assets/js/validation.js"></script>
     <script src="./../../assets/js/auth/login.js"></script>

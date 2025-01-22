@@ -1,8 +1,8 @@
 <?php 
+session_start();
 require_once './../../classes/Category.php';
 require_once './../../classes/User.php';
 require_once './../auth/user.php';
-session_start();
 
 if(!User::verifyAuth('admin')){
   header('Location: ./../auth/login.php');
@@ -47,7 +47,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
     <script src="./../../dist/js/demo-theme.min.js?1692870487"></script>
     <div class="page">
     <!-- header here -->
-
+    <?php require_once './../../utils/__header.php' ?>
       <div class="page-wrapper">
         <!-- Page header -->
         <div class="page-header d-print-none">
@@ -100,7 +100,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
             </div>
           </div>
         </div>
-
+        <?php require_once './../../utils/__footer.php' ?>
       </div>
     </div>
     <!-- Libs JS -->
