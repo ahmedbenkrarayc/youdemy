@@ -8,16 +8,13 @@ if(!User::verifyAuth('enseignant')){
   header('Location: ./../auth/login.php');
 }
 
-$cours = new Cours(null, null, null, null, null, null, null, $_SESSION['user_id']);
-$courses = $cours->getCoursesByEnseignant() ?? [] ;
-
-if($_SERVER['REQUEST_METHOD'] == 'POST'){
-  if(isset($_POST['id'])){
-    $cours = new Cours($_POST['id'], null, null, null, null, null, null, null);
-    $cours->deleteCourse();
-    header('Location: '.$_SERVER['PHP_SELF']);
-  }
+if(!isset($_GET['id'])){
+    header('Location: ./courses.php');
 }
+
+$cours = new Cours($_GET['id'], null, null, null, null, null, null, $_SESSION['user_id']);
+$inscriptions = $cours->getInscriptions() ?? [] ;
+
 ?>
 
 <!doctype html>
@@ -26,7 +23,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>Categories | Youdemy</title>
+    <title>Course inscriptions | Youdemy</title>
     <!-- CSS files -->
     <link href="./../../dist/css/tabler.min.css?1692870487" rel="stylesheet"/>
     <link href="./../../dist/css/tabler-flags.min.css?1692870487" rel="stylesheet"/>
@@ -55,7 +52,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
             <div class="row g-2 align-items-center">
               <div class="col">
                 <h2 class="page-title">
-                  Courses list
+                  Inscription list
                 </h2>
               </div>
             </div>
@@ -71,31 +68,20 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                     <thead>
                       <tr>
                         <th><button class="table-sort">#</button></th>
-                        <th><button class="table-sort">Title</button></th>
-                        <th><button class="table-sort">Type</button></th>
-                        <th><button class="table-sort">Category</button></th>
+                        <th><button class="table-sort">First name</button></th>
+                        <th><button class="table-sort">Last name</button></th>
+                        <th><button class="table-sort">Email</button></th>
                         <th><button class="table-sort" data-sort="sort-city">Created at</button></th>
-                        <th><button class="table-sort" data-sort="sort-type">Updated at</button></th>
-                        <th><button class="table-sort" data-sort="sort-score">Actions</button></th>
                       </tr>
                     </thead>
                     <tbody class="table-tbody">
-                      <?php foreach($courses as $index => $item ): ?>
+                      <?php foreach($inscriptions as $index => $item ): ?>
                       <tr>
                         <td class="sort-name"><?php echo $index+1 ?></td>
-                        <td class="sort-city"><?php echo $item['title'] ?></td>
-                        <td class="sort-city"><?php echo $item['TYPE'] ?></td>
-                        <td class="sort-city"><?php echo $item['category'] ?></td>
+                        <td class="sort-city"><?php echo $item['fname'] ?></td>
+                        <td class="sort-city"><?php echo $item['lname'] ?></td>
+                        <td class="sort-city"><?php echo $item['email'] ?></td>
                         <td class="sort-type"><?php echo explode(' ',$item['createdAt'])[0] ?></td>
-                        <td class="sort-score"><?php echo explode(' ', $item['updatedAt'])[0] ?></td>
-                        <td class="sort-date">
-                            <a href="./inscriptions.php?id=<?php echo $item['id'] ?>">inscriptions</a>
-                            <a href="./editcourse.php?id=<?php echo $item['id'] ?>">edit</a>
-                            <form action="<?php echo $_SERVER['PHP_SELF'] ?>" method="post" style="display: inline;">
-                              <input type="hidden" name="id" value="<?php echo $item['id'] ?>">
-                              <button type="submit" style="color:red; background:transparent; border:none;">delete</button>
-                            </form>
-                        </td>
                       </tr>
                       <?php endforeach; ?>
                     </tbody>

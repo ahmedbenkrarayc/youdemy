@@ -303,7 +303,7 @@ class Cours implements ICours{
                 array_push($this->errors, 'Id is required !');
                 $nullvalue = true;
             }
-            
+
             $connection = Database::getInstance()->getConnection();
             $query = 'DELETE FROM cours WHERE id = :id';
             $stmt = $connection->prepare($query);
@@ -353,6 +353,26 @@ class Cours implements ICours{
             $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
             $stmt->execute();
             return $stmt->fetch();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return null;
+        }
+    }
+
+    public function getInscriptions(){
+        try{
+            if($this->id == null){
+                $this->errors[] = 'Id is required !';
+                return false;
+            }
+
+            $connection = Database::getInstance()->getConnection();
+            $query = 'SELECT u.* from inscription i, user u where i.etudiant_id = u.id AND i.cours_id = :id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
         }catch(PDOException $e){
             Logger::error_log($e->getMessage());
             array_push($this->errors, 'Something went wrong !');
