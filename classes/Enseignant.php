@@ -164,4 +164,65 @@ class Enseignant extends Etudiant{
             return null;
         }
     }
+
+    //statistics
+    public function studentCount(){
+        try{
+            $connection = Database::getInstance()->getConnection();
+            $query = "SELECT COUNT(*) FROM inscription i INNER JOIN cours c ON i.cours_id = c.id WHERE c.enseignant_id = :id GROUP BY i.cours_id;";
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', $this->id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchColumn();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return null;
+        }
+    }
+    
+    public function coursCount(){
+        try{
+            $connection = Database::getInstance()->getConnection();
+            $query = "SELECT COUNT(*) FROM cours WHERE enseignant_id = :id;";
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', $this->id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchColumn();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return null;
+        }
+    }
+
+    public function todayInscriptionCount(){
+        try{
+            $connection = Database::getInstance()->getConnection();
+            $query = "SELECT COUNT(*) FROM cours WHERE enseignant_id = :id AND Date(createdAt) = CURDATE()";
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', $this->id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchColumn();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return null;
+        }
+    }
+
+    public function coursCountInscriptions(){
+        try{
+            $connection = Database::getInstance()->getConnection();
+            $query = "SELECT COUNT(*) AS ninscrit, title FROM cours c, inscription i WHERE c.id = i.cours_id AND c.enseignant_id = :id GROUP BY c.id ORDER BY ninscrit DESC LIMIT 10;";
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':id', $this->id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return null;
+        }
+    }
 }
