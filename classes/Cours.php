@@ -322,7 +322,17 @@ class Cours implements ICours{
     }
 
     public function getAllCourse(){
-
+        try{
+            $connection = Database::getInstance()->getConnection();
+            $query = 'SELECT a.*, u.fname AS teacher_fname, u.lname AS teacher_lname FROM cours a LEFT JOIN user u ON a.enseignant_id = u.id LEFT JOIN enseignant an ON a.enseignant_id = an.id WHERE an.id IS NULL OR an.suspended = 0;';
+            $stmt = $connection->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            array_push($this->errors, 'Something went wrong !');
+            return null;
+        }
     }
 
     public function getCoursesByEnseignant(){
@@ -348,7 +358,7 @@ class Cours implements ICours{
             }
 
             $connection = Database::getInstance()->getConnection();
-            $query = 'SELECT a.*, u.fname, u.lname FROM cours a INNER JOIN user u ON a.enseignant_id = u.id LEFT JOIN enseignant ad ON a.enseignant_id = ad.id WHERE (ad.id IS NULL OR ad.suspended = 0) AND a.id = :id';
+            $query = 'SELECT a.*, u.fname, u.lname, ct.name as category FROM cours a INNER JOIN category ct on ct.id = a.category_id INNER JOIN user u ON a.enseignant_id = u.id LEFT JOIN enseignant ad ON a.enseignant_id = ad.id WHERE (ad.id IS NULL OR ad.suspended = 0) AND a.id = :id';
             $stmt = $connection->prepare($query);
             $stmt->bindValue(':id', htmlspecialchars($this->id), PDO::PARAM_INT);
             $stmt->execute();
