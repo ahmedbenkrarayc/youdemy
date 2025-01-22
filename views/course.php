@@ -3,6 +3,7 @@ session_start();
 require_once './../classes/Cours.php';
 require_once './../classes/User.php';
 require_once './../classes/CoursTag.php';
+require_once './../classes/Inscription.php';
 require_once './auth/user.php';
 
 if(!isset($_GET['id'])){
@@ -20,7 +21,11 @@ $tagsCours = new CoursTag($_GET['id'] ,null);
 $allTags = $tagsCours->tagsOfCours() ?? [];
 
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
-
+    if(isset($_POST['inscription'])){
+        $inscription = new Inscription($_GET['id'], $_SESSION['user_id']);
+        $inscription->attachEtudiantCours();
+        // header('Location: ./etudiant/favorites.php');
+    }
 }
 
 ?>

@@ -9,7 +9,7 @@ class Inscription{
     public function __construct($cours_id, $etudiant_id){
         try{
             $this->setCoursId($cours_id);
-            $this->setTagId($etudiant_id);
+            $this->setEtudiantId($etudiant_id);
         }catch(InputException $e){
             array_push($this->errors, $e->getMessage());
         }
@@ -50,15 +50,105 @@ class Inscription{
                 throw new InputException('Etudiant id must be a positive number greater than 0 !');
         }
 
-        $this->etudiant = $etudiant;
+        $this->etudiant_id = $etudiant;
     }
 
     //methods
     public function attachEtudiantCours(){
-        
+        try{
+            $nullable = false;
+
+            if($this->cours_id == null){
+                $this->errors[] = 'Cours id is required !';
+                $nullable = true;
+            }
+
+            if($this->etudiant_id == null){
+                $this->errors[] = 'Etudiant id is required !';
+                $nullable = true;
+            }
+
+            if($nullable){
+                return false;
+            }
+
+            $this->detachEtudiantCours();
+            $connection =  Database::getInstance()->getConnection();
+            $query = 'INSERT INTO inscription(cours_id, etudiant_id) VALUES(:cours_id, :etudiant_id)';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':cours_id', htmlspecialchars($this->cours_id), PDO::PARAM_INT);
+            $stmt->bindValue(':etudiant_id', htmlspecialchars($this->etudiant_id), PDO::PARAM_INT);
+            if($stmt->execute()){
+                return true;
+            }
+
+            $this->errors[] = 'Something went wrong !';
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return false;
+        }
     }
 
     public function detachEtudiantCours(){
+        try{
+            $nullable = false;
 
+            if($this->cours_id == null){
+                $this->errors[] = 'Cours id is required !';
+                $nullable = true;
+            }
+
+            if($this->etudiant_id == null){
+                $this->errors[] = 'Etudiant id is required !';
+                $nullable = true;
+            }
+
+            if($nullable){
+                return false;
+            }
+
+            $connection =  Database::getInstance()->getConnection();
+            $query = 'DELETE FROM inscription WHERE cours_id = :cours_id AND etudiant_id = :etudiant_id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':cours_id', htmlspecialchars($this->cours_id), PDO::PARAM_INT);
+            $stmt->bindValue(':etudiant_id', htmlspecialchars($this->etudiant_id), PDO::PARAM_INT);
+            if($stmt->execute()){
+                return true;
+            }
+
+            $this->errors[] = 'Something went wrong !';
+            return false;
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return false;
+        }
+    }
+
+    public function getEtudiantCourses(){
+        try{
+            if($this->cours_id == null){
+                $this->errors[] = 'Cours id is required !';
+                return false;
+            }
+
+            if($this->etudiant_id == null){
+                $this->errors[] = 'Etudiant id is required !';
+                return false;
+            }
+
+            $connection =  Database::getInstance()->getConnection();
+            $query = 'SELECT c.* FROM inscription i INNER JOIN cours c on i.cours_id = c.id WHERE i.etudiant_id = :etudiant_id';
+            $stmt = $connection->prepare($query);
+            $stmt->bindValue(':etudiant_id', htmlspecialchars($this->etudiant_id), PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        }catch(PDOException $e){
+            Logger::error_log($e->getMessage());
+            $this->errors[] = 'Something went wrong !';
+            return null;
+        }
     }
 }

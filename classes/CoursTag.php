@@ -76,11 +76,11 @@ class CoursTag{
                 return true;
             }
 
-            $this->errors[] = $e->getMessage();
+            $this->errors[] = 'Something went wrong !';
             return false;
         }catch(PDOException $e){
             Logger::error_log($e->getMessage());
-            $this->errors[] = $e->getMessage();
+            $this->errors[] = 'Something went wrong !';
             return false;
         }
     }
