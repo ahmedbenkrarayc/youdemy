@@ -129,18 +129,19 @@ class Inscription{
 
     public function getEtudiantCourses(){
         try{
-            if($this->cours_id == null){
-                $this->errors[] = 'Cours id is required !';
-                return false;
-            }
+            $nullable = false;
 
             if($this->etudiant_id == null){
                 $this->errors[] = 'Etudiant id is required !';
+                $nullable = true;
+            }
+
+            if($nullable){
                 return false;
             }
 
             $connection =  Database::getInstance()->getConnection();
-            $query = 'SELECT c.* FROM inscription i INNER JOIN cours c on i.cours_id = c.id WHERE i.etudiant_id = :etudiant_id';
+            $query = 'SELECT c.*, fname, lname FROM inscription i INNER JOIN cours c on i.cours_id = c.id INNER JOIN user u ON u.id = c.enseignant_id WHERE i.etudiant_id = :etudiant_id';
             $stmt = $connection->prepare($query);
             $stmt->bindValue(':etudiant_id', htmlspecialchars($this->etudiant_id), PDO::PARAM_INT);
             $stmt->execute();
