@@ -145,7 +145,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST'){
                     <div>
                       <select class="form-select" name="category_id" id="category">
                         <?php foreach($categories as $category): ?>
-                          <option value="<?php echo $category['id'] ?>" selected="<?php echo $current['category_id'] == $category['id'] ?>"><?php echo $category['name'] ?></option>
+                          <option value="<?php echo $category['id'] ?>" <?php echo $current['category_id'] == $category['id'] ? 'selected' : '' ?>><?php echo $category['name'] ?></option>
                         <?php endforeach; ?>
                       </select>
                     </div>

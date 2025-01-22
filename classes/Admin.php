@@ -88,7 +88,7 @@ class Admin extends User{
     public function reparationParCategory(){
         try{
             $connection = Database::getInstance()->getConnection();
-            $query = "SELECT COUNT(*) AS nombre, name FROM category ct LEFT JOIN cours cr ON ct.id = cr.category_id GROUP BY ct.id";
+            $query = "SELECT COUNT(cr.id) AS nombre, ct.name FROM category ct LEFT JOIN cours cr ON ct.id = cr.category_id GROUP BY ct.id";
             $stmt = $connection->prepare($query);
             $stmt->execute();
             return $stmt->fetchAll();
