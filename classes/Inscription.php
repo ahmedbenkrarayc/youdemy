@@ -55,7 +55,7 @@ class Inscription{
 
     //methods
     public function attachEtudiantCours(){
-
+        
     }
 
     public function detachEtudiantCours(){

@@ -3,7 +3,6 @@ window.validateForm = (inputs) => {
   
     inputs.forEach((input) => {
       const { type, value, name, minChars, range } = input
-      console.log(type, value, name, minChars, range)
   
       if(type === "email") {
         const emailRegex = /\S+@\S+\.\S+/
@@ -25,10 +24,22 @@ window.validateForm = (inputs) => {
           errors.push(`${name} must be one of these values ${range.join(', ')}.`)
         }
       }else if(type === "image"){
-        if(!value){
+        if(!value.value){
           errors.push(`${name} is required and must be an image.`)
         }else if(!/\.(jpg|jpeg|png|gif|bmp)$/i.test(value.files[0].name)) {
           errors.push(`${name} must be a valid image file (jpg, jpeg, png, gif, bmp).`)
+        }
+      }else if(type === "video"){
+        if(!value.value){
+          errors.push(`${name} is required and must be a video.`)
+        }else if(!/\.(mp4|avi|mkv|mov|wmv)$/i.test(value.files[0].name)) {
+          errors.push(`${name} must be a valid video file (.mp4, .avi, .mkv, .mov, .wmv).`)
+        }
+      }else if(type === "document"){
+        if(!value.value){
+          errors.push(`${name} is required and must be a document.`)
+        }else if(!/\.(pdf|doc|docx|txt)$/i.test(value.files[0].name)) {
+          errors.push(`${name} must be a valid document (.pdf, .doc, .docx, .txt).`)
         }
       }
     })
