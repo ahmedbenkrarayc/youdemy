@@ -19,13 +19,13 @@ const getArticles = async () => {
     }
 }
 
-const display = () => {
+const display = (data) => {
     articlesContainer.innerHTML = ''
-    filteredData.forEach((item) => {
+    data.forEach((item) => {
         articlesContainer.innerHTML += `
         <div class="col-sm-6 col-lg-4">
             <div class="card card-sm">
-                <a href="./views/course.php?id=${item.id}" class="d-block"><img src="${item.cover}"></a>
+                <a href="./views/course.php?id=${item.id}" class="d-block"><img style="height: 176px;" src="${item.cover}"></a>
                 <div class="card-body">
                 <div class="d-flex align-items-center">
                     <div>
